@@ -1,6 +1,8 @@
 package com.cafepos.domain;
 
 import com.cafepos.common.Money;
+import com.cafepos.payment.PaymentStrategy;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +23,17 @@ public final class Order {
         items.add(li);
     }
 
-    public List<LineItem> items() { return Collections.unmodifiableList(items); }
+    // ✅ Added method
+    public void pay(PaymentStrategy strategy) {
+        if (strategy == null) {
+            throw new IllegalArgumentException("Payment strategy required");
+        }
+        strategy.pay(this);
+    }
+
+    public List<LineItem> items() {
+        return Collections.unmodifiableList(items);
+    }
 
     public Money subtotal() {
         return items.stream()
