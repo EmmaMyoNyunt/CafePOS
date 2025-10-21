@@ -1,9 +1,10 @@
 package com.cafepos.catalog;
 
 import com.cafepos.common.Money;
+import com.cafepos.decorator.Priced;   //  import Priced
 import java.util.Objects;
 
-public final class SimpleProduct implements Product {
+public final class SimpleProduct implements Product, Priced {   //  now implements Priced
     private final String id;
     private final String name;
     private final Money basePrice;
@@ -16,10 +17,25 @@ public final class SimpleProduct implements Product {
             throw new IllegalArgumentException("basePrice must be >= 0");
     }
 
-    @Override public String id() {
-        return id; }
-    @Override public String name() {
-        return name; }
-    @Override public Money basePrice() {
-        return basePrice; }
+    @Override
+    public String id() {
+        return id;
+    }
+
+    @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public Money basePrice() {
+        return basePrice;
+    }
+
+    // 🆕 Step 4: Implement Priced interface
+    @Override
+    public Money price() {
+        // for a simple product, price is just the base price
+        return basePrice();
+    }
 }

@@ -9,7 +9,7 @@ public final class Money implements Comparable<Money> {
     private static final RoundingMode RM = RoundingMode.HALF_UP;
     private final BigDecimal amount;
 
-    public static Money of (double value) {
+    public static Money of(double value) {
         BigDecimal bd = BigDecimal.valueOf(value).setScale(SCALE, RM);
         if (bd.compareTo(BigDecimal.ZERO) < 0)
             throw new IllegalArgumentException("amount must be >= 0");
@@ -20,7 +20,7 @@ public final class Money implements Comparable<Money> {
         return new Money(BigDecimal.ZERO.setScale(SCALE, RM));
     }
 
-    private Money (BigDecimal a) {
+    private Money(BigDecimal a) {
         if (a == null) throw new IllegalArgumentException("amount required");
         this.amount = a.setScale(SCALE, RM);
         if (this.amount.compareTo(BigDecimal.ZERO) < 0)
@@ -32,13 +32,13 @@ public final class Money implements Comparable<Money> {
         return new Money(this.amount.add(other.amount));
     }
 
-    //multiply, e,g, price x quantity
+    // multiply, e.g. price x quantity
     public Money multiply(int qty) {
         if (qty < 0) throw new IllegalArgumentException("qty must be >= 0");
         return new Money(this.amount.multiply(BigDecimal.valueOf(qty)));
     }
 
-    //multiply, e.g. % taxes
+    // multiply, e.g. % taxes
     public Money multiply(BigDecimal factor) {
         Objects.requireNonNull(factor, "factor required");
         return new Money(this.amount.multiply(factor));
@@ -65,5 +65,26 @@ public final class Money implements Comparable<Money> {
     @Override
     public String toString() {
         return amount.setScale(SCALE, RM).toPlainString();
+    }
+
+    // --- Compatibility helpers for Week6 lab (OrderManagerGod) ---
+
+    /** Create Money from BigDecimal */
+    public static Money of(BigDecimal value) {
+        Objects.requireNonNull(value, "value required");
+        if (value.compareTo(BigDecimal.ZERO) < 0)
+            throw new IllegalArgumentException("amount must be >= 0");
+        return new Money(value);
+    }
+
+    /** Return internal BigDecimal amount (for calculations) */
+    public BigDecimal asBigDecimal() {
+        return this.amount;
+    }
+
+    /** Multiply by double factor, e.g. 0.05 for 5% */
+    public Money multiply(double factor) {
+        BigDecimal bd = BigDecimal.valueOf(factor);
+        return new Money(this.amount.multiply(bd));
     }
 }

@@ -2,6 +2,7 @@ package com.cafepos.domain;
 
 import com.cafepos.catalog.Product;
 import com.cafepos.common.Money;
+import com.cafepos.decorator.Priced;   // 👈 ADD THIS import
 import java.util.Objects;
 
 public final class LineItem {
@@ -14,13 +15,17 @@ public final class LineItem {
         this.quantity = quantity;
     }
 
-    public Product product()
-    { return product; }
-    public int quantity()
-    { return quantity; }
+    public Product product() {
+        return product;
+    }
 
-    // uses product.basePrice().multiply(quantity)
+    public int quantity() {
+        return quantity;
+    }
+
+    //  UPDATED to use Priced if available
     public Money lineTotal() {
-        return product.basePrice().multiply(quantity);
+        Money unitPrice = (product instanceof Priced p) ? p.price() : product.basePrice();
+        return unitPrice.multiply(quantity);
     }
 }
