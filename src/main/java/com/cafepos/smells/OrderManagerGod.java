@@ -98,3 +98,6 @@ public class OrderManagerGod {
         return manager.process(recipe, qty, paymentType, debug);
     }
 }
+// No static global state.
+// All dependencies provided via constructor.
+// Behavior preserved (Week6CharacterizationTests should still pass)
