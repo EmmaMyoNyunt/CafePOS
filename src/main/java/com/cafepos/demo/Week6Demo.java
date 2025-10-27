@@ -1,25 +1,29 @@
 package com.cafepos.demo;
 
+import com.cafepos.checkout.CheckoutService;
 import com.cafepos.pricing.*;
-import com.cafepos.receipt.*;
-import com.cafepos.smells.OrderManagerGod;
+import com.cafepos.receipt.ReceiptPrinter;
+import com.cafepos.catalog.SimpleProduct;
+import com.cafepos.common.Money;
 
 public class Week6Demo {
     public static void main(String[] args) {
+        // 1️⃣ Inject dependencies
         DiscountPolicy discount = new LoyaltyPercentDiscount(5);
         TaxPolicy tax = new FixedRateTaxPolicy(10);
+        PricingService pricing = new PricingService(discount, tax);
         ReceiptPrinter printer = new ReceiptPrinter();
 
-        // Inject dependencies
-        OrderManagerGod manager = new OrderManagerGod(discount, tax, printer);
+        // 2️⃣ Create orchestrator
+        CheckoutService checkout = new CheckoutService(pricing, printer);
 
-        //  Example 1: Latte with loyalty discount
-        String output1 = manager.process("LAT+L", 1, "CASH", false);
+        // 3️⃣ Create a sample product
+        var latte = new SimpleProduct("P-LAT", "Latte", Money.of(3.90));
 
-        //  Example 2: Espresso with extra shot
-        String output2 = manager.process("ESP+SHOT", 2, "CARD", false);
+        // 4️⃣ Process checkout
+        String receipt = checkout.checkout(latte, 2, "CARD");
 
-        System.out.println(output1);
-        System.out.println(output2);
+        // 5️⃣ Output
+        System.out.println(receipt);
     }
 }
