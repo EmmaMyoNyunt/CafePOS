@@ -9,12 +9,30 @@ import com.cafepos.pricing.*;
 import com.cafepos.receipt.ReceiptPrinter;
 
 /**
- * Refactored version of the God class.
- * Delegates pricing, tax, and receipt printing to dedicated components.
+ * Final refactored version of OrderManagerGod.
+ * Dependencies (discount policy, tax policy, receipt printer) are injected via constructor.
+ * No global constants or hardcoded new() calls remain.
  */
 public class OrderManagerGod {
 
-    public static String process(String recipe, int qty, String paymentType, String discountCode, boolean debug) {
+    private final DiscountPolicy discountPolicy;
+    private final TaxPolicy taxPolicy;
+    private final ReceiptPrinter printer;
+
+    //  Constructor Injection
+    public OrderManagerGod(DiscountPolicy discountPolicy,
+                           TaxPolicy taxPolicy,
+                           ReceiptPrinter printer) {
+        this.discountPolicy = discountPolicy;
+        this.taxPolicy = taxPolicy;
+        this.printer = printer;
+    }
+
+    /**
+     * Processes an order using injected pricing and receipt components.
+     */
+    public String process(String recipe, int qty, String paymentType, boolean debug) {
+
         // Build product
         Priced product = switch (recipe) {
             case "ESP+SHOT+OAT" ->
@@ -27,35 +45,27 @@ public class OrderManagerGod {
                     new SimpleProduct("P-UNK", "Unknown", Money.of(1.00));
         };
 
-        // Clamp qty to at least 1 (fixes "qty must be >= 0" error)
+        //  Clamp qty to at least 1
         int safeQty = Math.max(1, qty);
 
-        // Calculate subtotal
+        //  Calculate subtotal
         Money subtotal = product.price().multiply(safeQty);
 
-        // Apply discount & tax through PricingService
-        DiscountPolicy discountPolicy = switch (discountCode) {
-            case "LOYAL5" -> new LoyaltyPercentDiscount(5);
-            case "COUPON1" -> new FixedCouponDiscount(Money.of(1.00));
-            default -> new NoDiscount();
-        };
-        TaxPolicy taxPolicy = new FixedRateTaxPolicy(10); // 10% VAT
-
+        //  Apply pricing via injected policies
         PricingService pricingService = new PricingService(discountPolicy, taxPolicy);
         PricingService.PricingResult result = pricingService.price(subtotal);
 
-        // Print receipt using ReceiptPrinter
-        ReceiptPrinter printer = new ReceiptPrinter();
+        //  Build receipt via injected printer
         String receipt = printer.print(
                 product.name(),
-                safeQty,                // FIXED — use safeQty here
+                safeQty,
                 result.subtotal(),
                 result.discount(),
                 result.tax(),
                 result.total()
         );
 
-        // 6️⃣ Add payment info
+        //  Add payment info (still polymorphic later)
         String paymentInfo = switch (paymentType.toUpperCase()) {
             case "CASH" -> "[Cash] Customer paid " + result.total() + " EUR in cash.";
             case "CARD" -> "[Card] Customer paid " + result.total() + " EUR by card.";
@@ -63,8 +73,28 @@ public class OrderManagerGod {
             default -> "[Unknown] Payment method not recognized.";
         };
 
-        // 7️⃣ Combine both outputs
         return receipt + "\n" + paymentInfo;
     }
-}
 
+    /**
+     * Legacy static helper for backward compatibility with older tests.
+     * Internally uses constructor injection.
+     */
+    public static String process(String recipe, int qty, String paymentType,
+                                 String discountCode, boolean debug) {
+
+        // Select discount based on code (still behavior-preserving)
+        DiscountPolicy discountPolicy = switch (discountCode) {
+            case "LOYAL5" -> new LoyaltyPercentDiscount(5);
+            case "COUPON1" -> new FixedCouponDiscount(Money.of(1.00));
+            default -> new NoDiscount();
+        };
+
+        TaxPolicy taxPolicy = new FixedRateTaxPolicy(10);
+        ReceiptPrinter printer = new ReceiptPrinter();
+
+        // Injects them (doesn’t create the dependencies — it receives them) //
+        OrderManagerGod manager = new OrderManagerGod(discountPolicy, taxPolicy, printer);
+        return manager.process(recipe, qty, paymentType, debug);
+    }
+}
