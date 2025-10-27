@@ -67,3 +67,4 @@ public class OrderManagerGod {
         return receipt + "\n" + paymentInfo;
     }
 }
+

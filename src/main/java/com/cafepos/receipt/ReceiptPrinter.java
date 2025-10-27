@@ -34,3 +34,4 @@ public class ReceiptPrinter {
         return sb.toString();
     }
 }
+
