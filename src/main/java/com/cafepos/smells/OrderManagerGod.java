@@ -44,11 +44,11 @@ public class OrderManagerGod {
         PricingService pricingService = new PricingService(discountPolicy, taxPolicy);
         PricingService.PricingResult result = pricingService.price(subtotal);
 
-        // 5️⃣ Print receipt using ReceiptPrinter
+        // Print receipt using ReceiptPrinter
         ReceiptPrinter printer = new ReceiptPrinter();
         String receipt = printer.print(
                 product.name(),
-                safeQty,                // ✅ FIXED — use safeQty here
+                safeQty,                // FIXED — use safeQty here
                 result.subtotal(),
                 result.discount(),
                 result.tax(),
