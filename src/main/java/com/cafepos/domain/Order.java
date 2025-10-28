@@ -76,4 +76,12 @@ public final class Order implements OrderPublisher {
     public void markReady() {
         notifyObservers("ready");
     }
+
+    public void removeItem(int index) {
+        if (index < 0 || index >= items.size()) {
+            throw new IndexOutOfBoundsException("Invalid item index.");
+        }
+        items.remove(index);
+        notifyObservers("itemRemoved");
+    }
 }
