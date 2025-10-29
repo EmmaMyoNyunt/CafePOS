@@ -8,22 +8,22 @@ import com.cafepos.common.Money;
 
 public class Week6Demo {
     public static void main(String[] args) {
-        // 1️⃣ Inject dependencies
+        //Inject dependencies
         DiscountPolicy discount = new LoyaltyPercentDiscount(5);
         TaxPolicy tax = new FixedRateTaxPolicy(10);
         PricingService pricing = new PricingService(discount, tax);
         ReceiptPrinter printer = new ReceiptPrinter();
 
-        // 2️⃣ Create orchestrator
+        //Create orchestrator
         CheckoutService checkout = new CheckoutService(pricing, printer);
 
-        // 3️⃣ Create a sample product
+        //Create a sample product
         var latte = new SimpleProduct("P-LAT", "Latte", Money.of(3.90));
 
-        // 4️⃣ Process checkout
+        //Process checkout
         String receipt = checkout.checkout(latte, 2, "CARD");
 
-        // 5️⃣ Output
+        //Output
         System.out.println(receipt);
     }
 }
