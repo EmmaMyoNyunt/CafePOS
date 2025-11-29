@@ -23,7 +23,7 @@ public final class SimpleProduct implements Product, Priced {
         return id;
     }
 
-    // This is the name() method required by the Priced interface
+    // This is the name method required by the Priced interface
     @Override
     public String name() {
         return name;
